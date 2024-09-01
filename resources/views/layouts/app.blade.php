@@ -20,6 +20,12 @@
     {{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    <style>
+        #online-users li:hover {
+            cursor: pointer;
+            background-color: #df9595
+        }
+    </style>
 </head>
 <body>
     <div id="app">

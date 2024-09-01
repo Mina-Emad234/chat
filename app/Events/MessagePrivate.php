@@ -2,23 +2,19 @@
 
 namespace App\Events;
 
-use App\Models\User;
-use App\Models\Message;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\InteractsWithBroadcasting;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Support\Facades\Log;
 
-class MessageSend implements ShouldBroadcastNow
+class MessagePrivate implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-
 
 
     /**
@@ -45,7 +41,7 @@ class MessageSend implements ShouldBroadcastNow
      */
     public function broadcastOn():array|channel
     {
-        return new Channel("chat-group");
+        return new PrivateChannel("chat-private.".$this->message->receiver_id);
     }
 
     public function broadcastWith()
@@ -55,11 +51,6 @@ class MessageSend implements ShouldBroadcastNow
     }
     public function broadcastAs()
     {
-        return "msg.sent";
+        return "msg.private";
     }
-
-
-
-
-
 }

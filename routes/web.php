@@ -27,4 +27,7 @@ Auth::routes();
 Route::group(['middleware'=>'auth:web'],function () {
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
     Route::resource('/messages', App\Http\Controllers\MessageController::class);
+    Route::get('/private/{id}', [App\Http\Controllers\MessageController::class, 'private'])->name('private');
+    Route::post('/private/store/{id}', [App\Http\Controllers\MessageController::class, 'privateStore'])->name('store.private');
+
 });

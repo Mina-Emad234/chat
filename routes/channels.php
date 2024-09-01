@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Message;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Broadcast;
@@ -23,7 +24,6 @@ Broadcast::channel('online', function ($user) {
     return ['id' => $user->id, 'name' => $user->name];
     // return Auth::check();
 });
-// Broadcast::channel('chat-group', function ($data) {
-//     log::info('sadsad',['sds'=>1]);
-//     return $data;
-// });
+Broadcast::channel('chat-private.{reciverId}', function ($user,$reciverId) {
+    return (int) $reciverId === (int) $user->id;
+});

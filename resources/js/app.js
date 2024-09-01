@@ -18,7 +18,11 @@ if (token) {
 }
 Pusher.logToConsole = true;
 window.onload = () => {
-    scrollDown();
+    if (window.location.pathname == '/messages') {
+        scrollDown();
+    }else{
+        scrollDownPrivate();
+    }
 }
 // window.pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
 //     cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
@@ -95,8 +99,13 @@ window.Echo.join('online')
          if (userId==user.id) {
             return;
         }
-            $("#online-users").append(`<li id="user-${user.id}" class="list-group-item"><span class="icon icon-circle text-success"></span> ${user.name}</li>`);
+            $("#online-users").append(`<a class="btn btn-white" href="/private/${user.id}"><li id="user-${user.id}" class="list-group-item"><span class="icon icon-circle text-success"></span> ${user.name}</li></a>`);
+        if(window.location.pathname=="/private/"+user.id){
+
+            $("#private-users li").prepend(`<span class="icon icon-circle text-success"></span> `);
+        }
         });
+
     })
     .joining((user) => {
         onlineUsersLength++;
@@ -130,6 +139,26 @@ window.Echo.channel('chat-group')
 
     })
 
+// if (window.location.pathname.split('/')[1] == 'private') {
+//     var reciverId = window.location.pathname.split('/')[2];
+// }
+var reciverId = $("meta[name=user-id]").attr("content");
+window.Echo.private(`chat-private.${reciverId}`)
+.listen(".msg.private", (e) => {
+
+        // console.log(e);
+
+        $("#chat-private").append(`
+            <div class="mt-4 w-50 text-white p-3 rounded float-end bg-warning">
+                    <b class="text-dark">${e.message.user.name}</b>
+                    <p>${e.message.body}</p>
+                </div>
+            <div class="clearfix"></div>
+        `);
+        scrollDownPrivate();
+
+    })
+
     $("#chat-text").on("keypress", function(e) {
 
         if (e.which == 13) { // 13 is the Enter key
@@ -137,13 +166,24 @@ window.Echo.channel('chat-group')
            sendMsg("#chat-text");
         }
     });
+    $("#chat-private").on("keypress", function(e) {
+
+        if (e.which == 13) { // 13 is the Enter key
+            e.preventDefault(); // Prevent the default action (new line in the textarea)
+           sendPrivateMsg("#chat-private-box");
+        }
+    });
 
         $("#send").on("click", function(e) {
             e.preventDefault(); // Prevent the default action (new line in the textarea)
             sendMsg("#chat-text");
         });
+        $("#send-private").on("click", function(e) {
+            e.preventDefault(); // Prevent the default action (new line in the textarea)
+            sendPrivateMsg("#chat-private-box");
+        });
     function sendMsg(element) {
-         let body = $(element).val();
+            let body = $(element).val();
             let url = $(element).data('url');
             let userName = $("meta[name=user-name]").attr("content");
             $(element).val('');
@@ -168,9 +208,38 @@ window.Echo.channel('chat-group')
 
             });
     }
+     function sendPrivateMsg(element) {
+            let body = $(element).val();
+            let url = $(element).data('url');
+            let userName = $("meta[name=user-name]").attr("content");
+            $(element).val('');
+
+            $("#chat-private").append(`
+                <div class="mt-4 w-50 text-white p-3 rounded float-start bg-primary">
+                    <b class="text-dark">${userName}</b>
+                    <p>${body}</p>
+                </div>
+                <div class="clearfix"></div>
+
+            `);
+            scrollDownPrivate();
+            let data = {
+                "_token":token.content,
+                body
+            }
+            $.ajax({
+                url:url,
+                method:"post",
+                data:data,
+
+            });
+    }
 
 
     function scrollDown() {
         document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+    }
+    function scrollDownPrivate() {
+        document.getElementById('chat-private').scrollTop = document.getElementById('chat-private').scrollHeight;
     }
 
